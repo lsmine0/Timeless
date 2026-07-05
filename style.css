@@ -6,8 +6,8 @@
 
 @font-face {
     font-family: 'BitFantasy';
-    src: url('/font/Bitfantasy.woff2') format('woff2'), /* Recommended compressed web format */
-         url('/font/Bitfantasy.ttf') format('truetype'); /* Standard fallback format */
+    src: url('./font/Bitfantasy.woff2') format('woff2'), /* Recommended compressed web format */
+         url('./font/Bitfantasy.ttf') format('truetype'); /* Standard fallback format */
     font-weight: normal;
     font-style: normal;
     
