@@ -30,18 +30,26 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    border: 3px solid #d4af37; /* Gold ornate border simulation */
     background: radial-gradient(circle, #2b1f3d 0%, #0b0711 100%); /* Deep space nebula vibe */
 }
 
+.top-bar div{
+   position: relative;
+  transform: translateY(10px);
+}
+
+
 /* --- Top Bar --- */
 .top-bar {
+    border-width:  0px 50px  50px 50px;
+    border-style: solid;
+    border-image-source: url('borders/BorderStyle1.png');
+    border-image-slice: 350;
+    border-image-repeat: stretch;
     height: 80px;
-    border-bottom: 2px solid #d4af37;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
     background: rgba(0, 0, 0, 0.4);
 }
 
@@ -210,13 +218,25 @@ body {
 /* --- Bottom Bar --- */
 .bottom-bar {
     height: 80px;
-    border-top: 2px solid #d4af37;
+
+    border-width: 50px 50px 0px 50px;
+    border-style: solid;
+    border-image-source: url('borders/BorderStyle1.png');
+    border-image-slice: 350;
+    border-image-repeat: stretch;
+
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0 30px;
-    gap: 40px;
+
+    gap: 50px;
+}
+
+
+.bottom-bar div{
+   position: relative;
+  transform: translateY(-20px);
 }
 
 .inventory-item {
@@ -363,4 +383,82 @@ body {
 /* Percentage Display Typography */
 #sell-percentage-display.percentage {
     font-size: 1.5rem;
+}
+
+.shop-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ensure it spans the full height of your sidebar panel */
+    min-height: 500px; /* Adjust based on your ideal layout height */
+    box-sizing: border-box;
+}
+
+.shop-top-half {
+    flex: 1; /* Takes up exactly 50% of parent height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centers layout chunks vertically */
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05); /* Clean divider line */
+    box-sizing: border-box;
+}
+
+.shop-bottom-half {
+    flex: 1; /* Takes up the remaining 50% */
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: hidden; /* Stops child objects from escaping bounds */
+}
+
+.section-title {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+/* The Upgrade Item scrolling viewport track */
+.upgrade-list {
+    flex: 1;
+    overflow-y: auto; /* Adds custom scrollbars dynamically when overflowing */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px; /* Space buffer for the native track scroll handle */
+}
+
+/* Individual Upgrade Row Items cards */
+.upgrade-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+}
+
+.upgrade-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.upgrade-name {
+    font-weight: bold;
+    color: #e0e0e8;
+}
+
+.upgrade-cost {
+    font-size: 0.85rem;
+    color: #e09f3e;
+}
+
+.buy-btn {
+    padding: 6px 12px;
+    cursor: pointer;
 }

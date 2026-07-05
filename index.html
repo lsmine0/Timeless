@@ -50,25 +50,47 @@
 
                 <div class="inspector-card">
                     <div id="panel-shop" class="inspector-content">
-                        <div class="resource-preview-wrapper">
-                            <img 
-                                src="img/BloodRockOfNight.png" 
-                                alt="Blood Rock Preview" 
-                                class="resource-preview-img" 
-                            />
+                        <div class="shop-top-half">
+                            <div class="resource-preview-wrapper">
+                                <img 
+                                    src="img/BloodRockOfNight.png" 
+                                    alt="Blood Rock Preview" 
+                                    class="resource-preview-img" 
+                                />
+                            </div>
+                            <div class="shop-sell-control">
+                                <input 
+                                    type="range" 
+                                    id="sell-slider" 
+                                    min="0" 
+                                    max="100" 
+                                    value="100" 
+                                    class="sell-slider"
+                                />
+                                <div id="sell-percentage-display" class="percentage">100%</div>
+                            </div>
+                            <button class="sell-btn">Sell</button>
                         </div>
-                        <div class="shop-sell-control">
-                            <input 
-                                type="range" 
-                                id="sell-slider" 
-                                min="0" 
-                                max="100" 
-                                value="100" 
-                                class="sell-slider"
-                            />
-                            <div id="sell-percentage-display" class="percentage">100%</div>
+
+                        <div class="shop-bottom-half">
+                            <h3 class="section-title">Upgrades</h3>
+                            <div class="upgrade-list">
+                                <div class="upgrade-item">
+                                    <div class="upgrade-details">
+                                        <span class="upgrade-name">Plasma Pickaxe</span>
+                                        <span class="upgrade-cost">💰 500</span>
+                                    </div>
+                                    <button class="buy-btn">Buy</button>
+                                </div>
+                                <div class="upgrade-item">
+                                    <div class="upgrade-details">
+                                        <span class="upgrade-name">Automated Drone</span>
+                                        <span class="upgrade-cost">💰 2,500</span>
+                                    </div>
+                                    <button class="buy-btn">Buy</button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="sell-btn">Sell</button>
                     </div>
 
                     <div id="panel-factories" class="inspector-content">
