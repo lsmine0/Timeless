@@ -20,6 +20,15 @@ state = {
     "current_resource": ResourceType.BLOOD_ROCK
 }
 
+
+upgardelist = [
+    {"",0,""},
+]
+
+
+
+Resource_multipliers = ["1", "5", "25", "125"]
+
 click_sound = Audio.new("sound/click.wav")
 
 
@@ -27,11 +36,30 @@ click_sound = Audio.new("sound/click.wav")
 
 
 def onSliderChange(event):
-    """Fires dynamically while the user drags the bar."""
     slider = document.getElementById("sell-slider")
     display = document.getElementById("sell-percentage-display")
-    if slider and display:
-        display.textContent = f"{slider.value}%"
+    sell_btn = document.getElementById("sell-btn-main")
+    
+    if not (slider and display and sell_btn):
+        return
+        
+    percent_val = slider.value
+    active_idx = state["current_resource"].value
+    
+    # 1. Grab base counts
+    total_resources = Decimal.new(state["resources_arr"][active_idx])
+    
+    # 2. Calculate target item fraction volume
+    sell_percent = Decimal.new(percent_val).div(Decimal.new("100"))
+    items_to_sell = total_resources.times(sell_percent).floor()
+    
+    # 3. Calculate expected cash value payload return
+    item_value = Decimal.new(Resource_multipliers[active_idx])
+    expected_profit = items_to_sell.times(item_value)
+    
+    # 4. Update the text elements
+    display.textContent = f"{percent_val}% ({items_to_sell.toString()} / {total_resources.toString()})"
+    sell_btn.textContent = f"Sell {items_to_sell.toString()} for 💰 {expected_profit.toString()}"
 
 
 def update_ui():
@@ -41,6 +69,8 @@ def update_ui():
         target_el = document.getElementById(f"res-{index}")
         if target_el:
             target_el.textContent = count_str
+
+    onSliderChange(None)        
             
 def onSellClick(event):
     """Sells only the dragged percentage fraction of the resources."""
@@ -52,7 +82,6 @@ def onSellClick(event):
     
     current_currency = Decimal.new(state["money"])
     total_profit = Decimal.new("0")
-    multipliers = ["1", "5", "25", "125"]
     
     for index, count_str in enumerate(state["resources_arr"]):
         total_items = Decimal.new(count_str)
@@ -60,7 +89,7 @@ def onSellClick(event):
         items_to_sell = total_items.times(sell_percent).floor() 
         items_remaining = total_items.minus(items_to_sell)
         
-        item_value = Decimal.new(multipliers[index])
+        item_value = Decimal.new(Resource_multipliers[index])
 
         sellmult = Decimal.new(state["click_power"][1])
         sellpow = Decimal.new(state["click_power"][2])
@@ -98,7 +127,7 @@ def setup_game_listeners(event=None):
     if click_target:
         click_target.addEventListener("click", create_proxy(onClickerClick))
 
-    shop_sell_btn = document.querySelector("#panel-shop .sell-btn")
+    shop_sell_btn = document.getElementById("sell-btn-main")
     if shop_sell_btn:
         shop_sell_btn.addEventListener("click", create_proxy(onSellClick))
 

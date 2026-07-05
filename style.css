@@ -158,11 +158,11 @@ body {
 .inspector-panel {
     position: relative; /* Set position anchor context for absolute children */
     background-color: #1a1616;
-    
+    overflow: hidden;
     min-width: 0;
     opacity: 0;
-    transform: translateX(50px);
-    transition: opacity 0.4s ease 0.1s, transform 0.5s ease;
+    transform: translateX(100%);
+    transition: opacity 0.5s ease 0.1s, transform 0.5s ease;
 }
 
 .inspector-card {
@@ -199,7 +199,7 @@ body {
     background-color: #ffffff;
 }
 
-.sell-btn {
+.secondary-btn {
     background: #2a1a08;
     color: #d4af37;
     border: 2px solid #d4af37;
@@ -210,7 +210,7 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.sell-btn:hover {
+.secondary-btn:hover {
     background: #d4af37;
     color: #2a1a08;
 }
