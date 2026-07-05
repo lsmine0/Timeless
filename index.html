@@ -6,22 +6,152 @@
 
     <script type="module" src="https://pyscript.net/releases/2025.5.1/core.js">  </script>
     <script src="https://cdn.jsdelivr.net/npm/break_eternity.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <h1>My Incremental Game</h1>
+    <div class="game-container">
+        <header class="top-bar">
+            <div class="header-left">
+                <div class="level-indicator">Level: <span>1</span></div>
+            </div>
+            <div class="header-center">
+                <div class="skill-points">Skill Points: <span>0</span></div>
+            </div>
+            <div class="header-right">
+                <div class="currency">💰 <span id="money-val">0</span></div>
+            </div>
+        </header>
 
-    <div>
-        Gold: <span id="gold">0</span>
+        <main class="main-content" id="main-layout" data-state="collapsed">
+            
+            <section class="viewport-panel">
+                <div class="clicker-wrapper">
+                    <img 
+                        id="clicker-image" 
+                        src="img/BloodRockOfNight.png" 
+                        alt="Target Asteroid" 
+                        class="clicker-target"
+                    />
+                </div>
+            </section>
+
+            <nav class="menu-panel">
+                <button class="menu-btn" onclick="openInspector('panel-shop')">Shop</button>
+                <button class="menu-btn" onclick="openInspector('panel-factories')">Factories</button>
+                <button class="menu-btn" onclick="openInspector('panel-potions')">Potions</button>
+                <button class="menu-btn" onclick="openInspector('panel-skills')">Skills</button>
+            </nav>
+
+            <section class="inspector-panel">
+                <button class="close-inspector-btn" onclick="closeInspector()" aria-label="Close Inspector">x</button>
+
+                <div class="inspector-card">
+                    <div id="panel-shop" class="inspector-content">
+                        <div class="resource-preview-wrapper">
+                            <img 
+                                src="img/BloodRockOfNight.png" 
+                                alt="Blood Rock Preview" 
+                                class="resource-preview-img" 
+                            />
+                        </div>
+                        <div class="shop-sell-control">
+                            <input 
+                                type="range" 
+                                id="sell-slider" 
+                                min="0" 
+                                max="100" 
+                                value="100" 
+                                class="sell-slider"
+                            />
+                            <div id="sell-percentage-display" class="percentage">100%</div>
+                        </div>
+                        <button class="sell-btn">Sell</button>
+                    </div>
+
+                    <div id="panel-factories" class="inspector-content">
+                        <h2>Factory Hub</h2>
+                        <div class="resource-preview" style="background-color: #223c22;"></div>
+                        <button class="sell-btn">Buy Factory</button>
+                    </div>
+
+                    <div id="panel-potions" class="inspector-content">
+                        <h2>Potion Brewer</h2>
+                        <div class="resource-preview" style="background-color: #3c1e4a;"></div>
+                        <button class="sell-btn">Brew Potion</button>
+                    </div>
+
+                    <div id="panel-skills" class="inspector-content">
+                        <h2>Potion Brewer</h2>
+                        <div class="resource-preview" style="background-color: #3c1e4a;"></div>
+                        <button class="sell-btn">Brew Potion</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bottom-bar">
+            <div class="inventory-item">
+                <span class="icon">🪨</span>
+                <span id="res-0" class="count">10</span>
+            </div>
+            <div class="inventory-item">
+                <span class="icon">🎹</span>
+                <span id="res-1" class="count">0</span>
+            </div>
+            <div class="inventory-item">
+                <span class="icon">🚀</span>
+                <span id="res-2" class="count">0</span>
+            </div>
+            <div class="inventory-item">
+                <span class="icon">🔮</span>
+                <span id="res-3" class="count">0</span>
+            </div>
+        </footer>
     </div>
 
-    <button id="mine">
-        Mine Gold
-    </button>
-
-    <script type="py" src="./main.py"></script>
-
 </body>
+<script>
+    function openInspector(targetPanelId) {
+        document.querySelectorAll('.inspector-content').forEach(panel => {
+        panel.classList.remove('active');
+        });
+
+        const activePanel = document.getElementById(targetPanelId);
+        if (activePanel) {
+            activePanel.classList.add('active');
+        }
+
+    
+        const layout = document.getElementById('main-layout');
+        if (layout) {
+            layout.setAttribute('data-state', 'expanded');
+        }
+
+        document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+        if (event) event.currentTarget.classList.add('active');
+    }
+
+    function closeInspector() {
+        const layout = document.getElementById('main-layout');
+        if (layout) {
+            layout.setAttribute('data-state', 'collapsed');
+        }
+        document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+    }
+
+
+</script>  
+<script>
+    function swapClickerAsset(newAssetUrl) {
+        const asteroidImg = document.getElementById('asteroid-image');
+        if (asteroidImg) {
+            asteroidImg.src = newAssetUrl;
+        }
+    }
+
+</script>
+<script type="py" src="./main.py"></script>
 </html>

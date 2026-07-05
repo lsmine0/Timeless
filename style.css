@@ -1,0 +1,368 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@font-face {
+    font-family: 'BitFantasy';
+    src: url('/font/Bitfantasy.woff2') format('woff2'), /* Recommended compressed web format */
+         url('/font/Bitfantasy.ttf') format('truetype'); /* Standard fallback format */
+    font-weight: normal;
+    font-style: normal;
+    
+}
+
+body {
+    font-family: 'BitFantasy', 'Georgia', serif;
+    background-color: #0b0711;
+    color: #ffffff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Main Container: Forces 16:9 or full-screen aspect ratio */
+.game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border: 3px solid #d4af37; /* Gold ornate border simulation */
+    background: radial-gradient(circle, #2b1f3d 0%, #0b0711 100%); /* Deep space nebula vibe */
+}
+
+/* --- Top Bar --- */
+.top-bar {
+    height: 80px;
+    border-bottom: 2px solid #d4af37;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.top-bar div {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+/* --- Main Layout Grid --- */
+.main-content {
+    display: grid;
+    height: calc(100vh - 160px); /* Adjust based on your header/footer */
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    transition: grid-template-columns 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+}
+
+.main-content[data-state="collapsed"] {
+    grid-template-columns: 1fr 160px 0fr; 
+}
+
+.main-content[data-state="expanded"] {
+    grid-template-columns: 0fr 30% 1fr; 
+}
+
+.main-content[data-state="expanded"] .inspector-panel {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Custom Slide Adjustment: Targets the wrapper inside the collapsing grid item */
+.main-content[data-state="expanded"] .clicker-wrapper {
+    transform: translateX(-150%); /* Bodily slides the asteroid left ahead of the collapse */
+    opacity: 0;
+}
+
+/* Left Panel: Space Viewport */
+.viewport-panel {
+    background-color: #1a1525;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0; /* Prevents text/elements from forcing the grid column open */
+    transition: opacity 0.4s ease;
+    overflow: hidden;
+}
+
+.clicker-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(80px);
+    flex-shrink: 0; /* Keeps its proportions locked during the grid change */
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.15)); /* Glow effect for transparent PNGs */
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+}
+
+.clicker-target {
+    max-width: 450px;  /* Control maximum size on screen */
+    max-height: 450px;
+    width: 100%;
+    height: auto;
+    object-fit: contain; /* Prevents stretching if the new image has different proportions */
+    cursor: pointer;
+    user-select: none;   /* Prevents dragging highlighting the image on rapid clicks */
+    -webkit-user-drag: none;
+    transition: transform 0.05s ease; /* Snappy click feedback */
+}    
+
+.clicker-target:active {
+    transform: scale(0.9) 
+}
+
+/* Middle Panel: Menu Navigation */
+.menu-panel {
+    background-color: #120d1a;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    z-index: 2; /* Ensures it cleanly pushes across other layers */
+}
+
+.menu-btn {
+    background: transparent;
+    color: #e0d0cc;
+    border: 1px solid #4a3319;
+    padding: 12px 5px;
+    margin: 4px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+    transition: all 0.2s ease;
+}
+
+.menu-btn:hover, .menu-btn.active {
+    background-color: #382512;
+    color: #fff;
+    border-color: #d4af37;
+}
+
+/* Right Panel: Inspector */
+.inspector-panel {
+    position: relative; /* Set position anchor context for absolute children */
+    background-color: #1a1616;
+    
+    min-width: 0;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.4s ease 0.1s, transform 0.5s ease;
+}
+
+.inspector-card {
+    width: 100%;
+    height: 100%;
+    background-color: #262421;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.progress-container {
+    width: 100%;
+    text-align: center;
+}
+
+.percentage {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 20px;
+    background-color: #111;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #555;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #ffffff;
+}
+
+.sell-btn {
+    background: #2a1a08;
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    padding: 10px 30px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.sell-btn:hover {
+    background: #d4af37;
+    color: #2a1a08;
+}
+
+/* --- Bottom Bar --- */
+.bottom-bar {
+    height: 80px;
+    border-top: 2px solid #d4af37;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 30px;
+    gap: 40px;
+}
+
+.inventory-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5rem;
+}
+
+.close-inspector-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    color: #e0d0cc;
+    border: 1px solid #4a3319;
+    font-size: 1.5rem;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.close-inspector-btn:hover {
+    color: #ffffff;
+    border-color: #d4af37;
+    background-color: #382512;
+}
+
+/* Hide all sub-panels inside the inspector card by default */
+.inspector-content {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+/* Show the chosen panel natively */
+.inspector-content.active {
+    display: flex;
+}
+
+/* Container framework for the preview thumbnail asset */
+.resource-preview-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 140px;
+    height: 140px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid #4a3319;
+    padding: 10px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+}
+
+/* Constrains the image cleanly inside its preview item frame box */
+.resource-preview-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+}
+
+/* Container Layout */
+.shop-sell-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(20, 20, 25, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    max-width: 300px;
+    margin: 10px auto;
+}
+
+/* Base Slider Reset */
+.sell-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #1a1a24;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Track Highlight (Optional: custom accent color) */
+.sell-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #2a2a3a, #3b3b54);
+    border-radius: 4px;
+}
+
+/* Slider Thumb (The Drag Handle) - Webkit (Chrome, Safari, Edge, Opera) */
+.sell-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e09f3e; /* Warm golden game accent */
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(224, 159, 62, 0.6);
+    cursor: grab;
+    margin-top: -6px; /* Centers thumb on the 8px track */
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.sell-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.15);
+    background: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+/* Slider Thumb - Firefox Support */
+.sell-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #e09f3e;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(224, 159, 62, 0.6);
+    cursor: grab;
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.sell-slider::-moz-range-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.15);
+    background: #fff;
+}
+
+/* Percentage Display Typography */
+#sell-percentage-display.percentage {
+    font-size: 1.5rem;
+}
