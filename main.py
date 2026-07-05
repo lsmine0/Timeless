@@ -1,4 +1,4 @@
-from js import document, Decimal
+from js import document, Decimal, Audio
 from pyodide.ffi import create_proxy
 from enum import Enum
 
@@ -19,6 +19,12 @@ state = {
     "sell_power": ["1","1"],
     "current_resource": ResourceType.BLOOD_ROCK
 }
+
+click_sound = Audio.new("sound/click.wav")
+
+
+
+
 
 def onSliderChange(event):
     """Fires dynamically while the user drags the bar."""
@@ -70,6 +76,10 @@ def onSellClick(event):
     update_ui()
 
 def onClickerClick(event):
+    click_sound.currentTime = 0
+    click_sound.play()
+
+
     active_idx = state["current_resource"].value
     
     current_resource_amt = Decimal.new(state["resources_arr"][active_idx])
