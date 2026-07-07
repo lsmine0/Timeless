@@ -515,6 +515,12 @@ width: 80%;
 .card-cost { font-size: 1.05rem; color: #e09f3e;}
 .card-stat-label { font-size: 0.95rem; color: #aaa;}
 
+.card-upgrade {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
 /* Locking state handling logic overlay styles */
 .card-item.massive-factory-card.locked {
     filter: grayscale(100%) brightness(55%);

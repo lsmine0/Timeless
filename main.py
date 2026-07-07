@@ -18,7 +18,7 @@ state = {
         Decimal.new("0"), 
         Decimal.new("0"), 
         Decimal.new("0")],
-    "money": Decimal.new("0"),
+    "money": Decimal.new("100"),
     "click_power": [
         Decimal.new("1"),
         Decimal.new("1"),
@@ -31,7 +31,7 @@ state = {
 
 factories = {
     "F1" : [
-        True,
+        False,
         Decimal.new("0"),
         Decimal.new("1"),
         Decimal.new("10"),
@@ -64,10 +64,152 @@ settings = {
 
 }
 
-upgardelist = [
-    {"",0,""},
+
+def unlock_f1():
+    factories["F1"][0] = True
+    pass
+
+def unlock_f2():
+    factories["F2"][0] = True
+    pass
+
+def unlock_f3():
+    factories["F3"][0] = True
+    pass
+    
+def unlock_f4():
+    factories["F4"][0] = True
+    pass
+
+upgradelist = [
+    {
+        "purchased": False, 
+        "id": "U1", 
+        "cost": Decimal.new("20"), 
+        "label": "Unlock Factory 1", 
+        "action": unlock_f1
+    },
+    {
+        "purchased": False, 
+        "id": "U2", 
+        "cost": Decimal.new("ee9.9"), 
+        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
+        "action": unlock_f1
+    },
+    {
+        "purchased": False, 
+        "id": "U3", 
+        "cost": Decimal.new("ee9.9"), 
+        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
+        "action": unlock_f1
+    },
+    {
+        "purchased": False, 
+        "id": "U4", 
+        "cost": Decimal.new("ee9.9"), 
+        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
+        "action": unlock_f1
+    },
+    {
+        "purchased": False, 
+        "id": "U5", 
+        "cost": Decimal.new("ee9.9"), 
+        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
+        "action": unlock_f1
+    },
+    {
+        "purchased": False, 
+        "id": "U6", 
+        "cost": Decimal.new("ee9.9"), 
+        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
+        "action": unlock_f1
+    },
+    {
+        "purchased": False, 
+        "id": "U7", 
+        "cost": Decimal.new("ee9.9"), 
+        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
+        "action": unlock_f1
+    }
 ]
 
+
+def buy_upgrade(upgrade_id):
+    user_cash = state["money"]
+    # Locate target profile metadata matching targeted ID
+    target_upg = next((u for u in upgradelist if u["id"] == upgrade_id), None)
+    
+    cost = target_upg["cost"]
+    
+    if user_cash.gte(cost):
+        target_upg = next((u for u in upgradelist if u["id"] == upgrade_id), None)
+        
+        if not target_upg or target_upg["purchased"]:
+            return
+
+        target_upg["action"]() 
+        
+        # 2. Mark state status
+        target_upg["purchased"] = True
+        
+        # 3. Destroy the HTML element completely
+        card_element = document.getElementById(f"upg-card-{upgrade_id}")
+        if card_element:
+            card_element.remove()
+
+        RebuilUpgradeList()    
+
+def upgrade_handler(u_id):
+    return create_proxy(lambda event: buy_upgrade(u_id))
+
+
+def RebuilUpgradeList():
+    container = document.getElementById("upgrades-container")
+    if not container:
+        return
+
+
+    container.innerHTML = ""
+
+    available_upgrades = [u for u in upgradelist if not u["purchased"]]
+    
+
+    sorted_upgrades = sorted(available_upgrades, key=lambda x: float(x["cost"].toString()))
+
+    visible_upgrades = sorted_upgrades[:5]
+
+    for upg in visible_upgrades:
+        u_id = upg["id"]
+        
+        card = document.createElement("div")
+        card.className = "card-item"
+        card.id = f"upg-card-{u_id}"
+        
+        details = document.createElement("div")
+        details.className = "card-details card-upgrade"
+        
+        label_span = document.createElement("span")
+        label_span.className = "card-name"
+        label_span.textContent = upg["label"]
+        
+        cost_span = document.createElement("span")
+        cost_span.className = "card-cost"
+        cost_span.textContent = f"💰 {upg['cost'].toString()}"
+        
+        details.appendChild(label_span)
+        details.appendChild(cost_span)
+        
+        btn = document.createElement("button")
+        btn.className = "secondary-btn"
+        btn.id = f"upg-btn-{u_id}"
+        btn.textContent = "Buy"
+        
+        btn.onclick = upgrade_handler(u_id)
+        
+        card.appendChild(details)
+        card.appendChild(btn)
+        
+        container.appendChild(card)
 
 
 Resource_multipliers = [
@@ -110,6 +252,8 @@ def onSliderChange(event):
     sell_btn.textContent = f"Sell {items_to_sell.toString()} for 💰 {expected_profit.toString()}"
 
 
+
+
 def update_ui():
     document.getElementById("money-val").textContent = state["money"].toString()
     
@@ -144,11 +288,15 @@ def update_ui():
             else:
                 card_item.classList.add("locked") 
 
+    
+
 def buy_factory(f_id, amount_type="1"):
-    user_cash = Decimal.new(state["money"])
+    user_cash = state["money"]
     data = factories[f_id]
     cost = data[3]
-    
+    if not data[0]: 
+        return
+    ClickEffect()
     if amount_type == "1":
         if user_cash.gte(cost):
             state["money"] = user_cash.minus(cost)
@@ -177,8 +325,9 @@ def upgrade_factory(f_id):
     up_cost = data[4]
     
     if user_cash.gte(up_cost):
-        state["currency_str"] = user_cash.minus(up_cost).toString()
-        data[4] = data[4].mul(Decimal.pow("2"))
+        ClickEffect()
+        state["money"] = user_cash.minus(up_cost)
+        data[4] = data[4].pow(Decimal.new("2"))
         data[2] = data[2].plus(Decimal.new("1")) # Multiplier production step up +1
         update_ui()
 
@@ -218,12 +367,17 @@ def onSellClick(event):
         
     new_currency_total = current_currency.plus(total_profit)
     state["money"] = new_currency_total
-    
+    ClickEffect()
+
+
     update_ui()
 
-def onClickerClick(event):
+def ClickEffect():
     click_sound.currentTime = 0
     click_sound.play()
+
+def onClickerClick(event):
+    ClickEffect()
 
 
     active_idx = state["current_resource"].value
@@ -288,7 +442,7 @@ def setup_game_listeners(event=None):
     window.setInterval(tick_proxy, 50)
 
     update_ui()
-
+    RebuilUpgradeList()
 
 
 
