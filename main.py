@@ -1,4 +1,4 @@
-from js import document, Decimal, Audio
+from js import document, Decimal, Audio, window
 from pyodide.ffi import create_proxy
 from enum import Enum
 
@@ -13,13 +13,56 @@ class ResourceType(Enum):
 # TIME_REMNANT = 5
 
 state = {
-    "resources_arr": ["0", "0", "0", "0"],
-    "money": "0",
-    "click_power": ["1","1","1"],
-    "sell_power": ["1","1"],
+    "resources_arr": [
+        Decimal.new("0"), 
+        Decimal.new("0"), 
+        Decimal.new("0"), 
+        Decimal.new("0")],
+    "money": Decimal.new("0"),
+    "click_power": [
+        Decimal.new("1"),
+        Decimal.new("1"),
+        Decimal.new("1")],
+    "sell_power": [
+        Decimal.new("1"),
+        Decimal.new("1")],
     "current_resource": ResourceType.BLOOD_ROCK
 }
 
+factories = {
+    "F1" : [
+        True,
+        Decimal.new("0"),
+        Decimal.new("1"),
+        Decimal.new("10"),
+        Decimal.new("1e6")
+    ],
+    "F2" : [
+        False,
+        Decimal.new("0"),
+        Decimal.new("1"),
+        Decimal.new("100"),
+        Decimal.new("1e12")
+    ],
+    "F3" : [
+        False,
+        Decimal.new("0"),
+        Decimal.new("1"),
+        Decimal.new("1000"),
+        Decimal.new("1e30")
+    ],
+    "F4" : [
+        False,
+        Decimal.new("0"),
+        Decimal.new("1"),
+        Decimal.new("10000"),
+        Decimal.new("1e50")
+    ]
+}
+
+settings = {
+
+}
 
 upgardelist = [
     {"",0,""},
@@ -27,7 +70,12 @@ upgardelist = [
 
 
 
-Resource_multipliers = ["1", "5", "25", "125"]
+Resource_multipliers = [
+    Decimal.new("1"),
+    Decimal.new("5"),
+    Decimal.new("25"),
+    Decimal.new("125")
+    ]
 
 click_sound = Audio.new("sound/click.wav")
 
@@ -47,30 +95,99 @@ def onSliderChange(event):
     active_idx = state["current_resource"].value
     
     # 1. Grab base counts
-    total_resources = Decimal.new(state["resources_arr"][active_idx])
+    total_resources = state["resources_arr"][active_idx]
     
     # 2. Calculate target item fraction volume
     sell_percent = Decimal.new(percent_val).div(Decimal.new("100"))
     items_to_sell = total_resources.times(sell_percent).floor()
     
     # 3. Calculate expected cash value payload return
-    item_value = Decimal.new(Resource_multipliers[active_idx])
+    item_value = Resource_multipliers[active_idx]
     expected_profit = items_to_sell.times(item_value)
     
     # 4. Update the text elements
-    display.textContent = f"{percent_val}% ({items_to_sell.toString()} / {total_resources.toString()})"
+    display.textContent = f"{percent_val}% ({items_to_sell.toString()} / {total_resources.floor().toString()})"
     sell_btn.textContent = f"Sell {items_to_sell.toString()} for 💰 {expected_profit.toString()}"
 
 
 def update_ui():
-    document.getElementById("money-val").textContent = state["money"]
+    document.getElementById("money-val").textContent = state["money"].toString()
     
-    for index, count_str in enumerate(state["resources_arr"]):
+    for index, count in enumerate(state["resources_arr"]):
         target_el = document.getElementById(f"res-{index}")
         if target_el:
-            target_el.textContent = count_str
+            target_el.textContent = count.floor().toString()
 
-    onSliderChange(None)        
+    onSliderChange(None)    
+
+    for f_id, data in factories.items():
+        is_unlocked = data[0]
+        count = data[1]
+        mult = data[2]
+        cost = data[3]
+        multcost =data[4]
+        # 1. Update text displays dynamically
+        count_el = document.getElementById(f"{f_id}-count")
+        mult_el = document.getElementById(f"{f_id}-mult")
+        cost_el = document.getElementById(f"{f_id}-cost")
+        mulcost_el = document.getElementById(f"{f_id}-mult-cost")
+        card_item = document.getElementById(f_id)
+        
+        if count_el: count_el.textContent = count.toString()
+        if mult_el: mult_el.textContent = f"{mult.toString()}x"
+        if cost_el: cost_el.textContent = cost.toString()
+        if mulcost_el: mulcost_el.textContent = multcost.toString()
+        
+        if card_item:
+            if is_unlocked:
+                card_item.classList.remove("locked")
+            else:
+                card_item.classList.add("locked") 
+
+def buy_factory(f_id, amount_type="1"):
+    user_cash = Decimal.new(state["money"])
+    data = factories[f_id]
+    cost = data[3]
+    
+    if amount_type == "1":
+        if user_cash.gte(cost):
+            state["money"] = user_cash.minus(cost)
+            data[1] = data[1].plus(Decimal.new("1")) # Count += 1
+            data[0] = True # Set isUnlocked to True
+            # Simple scaling pricing mechanic: price * 1.5 per purchase
+            data[3] = cost.times(Decimal.new("1.5")).floor() 
+            
+    elif amount_type == "max":
+        # Check how many they can afford right now
+        if user_cash.gte(cost):
+            afford_count = user_cash.div(cost).floor()
+            if afford_count.gt(0):
+                total_spent = afford_count.times(cost)
+                state["currency_str"] = user_cash.minus(total_spent)
+                data[1] = data[1].plus(afford_count)
+                data[0] = True
+                data[3] = cost.times(Decimal.new("1.5").pow(afford_count)).floor()
+
+    update_ui()                   
+
+def upgrade_factory(f_id):
+    user_cash = Decimal.new(state["money"])
+    data = factories[f_id]
+    
+    up_cost = data[4]
+    
+    if user_cash.gte(up_cost):
+        state["currency_str"] = user_cash.minus(up_cost).toString()
+        data[4] = data[4].mul(Decimal.pow("2"))
+        data[2] = data[2].plus(Decimal.new("1")) # Multiplier production step up +1
+        update_ui()
+
+# --- PROXY CLOSURES FOR CLICK ARGUMENTS ---
+def make_buy_handler(f_id, amt):
+    return create_proxy(lambda event: buy_factory(f_id, amt))
+
+def make_upgrade_handler(f_id):
+    return create_proxy(lambda event: upgrade_factory(f_id))
             
 def onSellClick(event):
     """Sells only the dragged percentage fraction of the resources."""
@@ -89,18 +206,18 @@ def onSellClick(event):
         items_to_sell = total_items.times(sell_percent).floor() 
         items_remaining = total_items.minus(items_to_sell)
         
-        item_value = Decimal.new(Resource_multipliers[index])
+        item_value = Resource_multipliers[index]
 
-        sellmult = Decimal.new(state["click_power"][1])
-        sellpow = Decimal.new(state["click_power"][2])
+        sellmult = state["click_power"][1]
+        sellpow = state["click_power"][2]
 
         total_profit = total_profit.plus(items_to_sell.times(item_value.times(sellmult).pow(sellpow)))
         
 
-        state["resources_arr"][index] = items_remaining.toString()
+        state["resources_arr"][index] = items_remaining
         
     new_currency_total = current_currency.plus(total_profit)
-    state["money"] = new_currency_total.toString()
+    state["money"] = new_currency_total
     
     update_ui()
 
@@ -111,16 +228,38 @@ def onClickerClick(event):
 
     active_idx = state["current_resource"].value
     
-    current_resource_amt = Decimal.new(state["resources_arr"][active_idx])
-    clickflat = Decimal.new(state["click_power"][0])
-    clickmult = Decimal.new(state["click_power"][1])
-    clickpow = Decimal.new(state["click_power"][2])
+    current_resource_amt = state["resources_arr"][active_idx]
+    clickflat = state["click_power"][0]
+    clickmult = state["click_power"][1]
+    clickpow = state["click_power"][2]
 
     delta = Decimal.new("0").plus(clickflat).mul(clickmult).pow(clickpow)
-    state["resources_arr"][active_idx] = Decimal.new(state["resources_arr"][active_idx]).plus(delta).toString()
+    state["resources_arr"][active_idx] = state["resources_arr"][active_idx].plus(delta)
     
     update_ui()
 
+
+def game_tick():
+
+    tick_fraction = Decimal.new("0.05")
+    state_changed = False
+
+    for index, f_id in enumerate(["F1", "F2", "F3", "F4"]):
+        data = factories[f_id]
+        is_unlocked = data[0]
+        count = data[1]
+        power = data[2]
+        
+
+        if is_unlocked and count.gt(0):
+            produced_this_tick = count.pow(power).times(tick_fraction)
+            
+            if produced_this_tick.gt(0):
+                # Add to current resource stockpile
+                current_stock = state["resources_arr"][index]
+                state["resources_arr"][index] = current_stock.plus(produced_this_tick)
+
+    update_ui()
 
 def setup_game_listeners(event=None):
     click_target = document.getElementById("clicker-image")
@@ -136,7 +275,23 @@ def setup_game_listeners(event=None):
         slider_proxy = create_proxy(onSliderChange)
         sell_slider.addEventListener("input", slider_proxy)
 
+    for f_id in factories.keys():
+        btn_buy1 = document.getElementById(f"{f_id}-buy1")
+        btn_max = document.getElementById(f"{f_id}-buymax")
+        btn_up = document.getElementById(f"{f_id}-upgrade")
+        
+        if btn_buy1: btn_buy1.addEventListener("click", make_buy_handler(f_id, "1"))
+        if btn_max: btn_max.addEventListener("click", make_buy_handler(f_id, "max"))
+        if btn_up: btn_up.addEventListener("click", make_upgrade_handler(f_id))
+
+    tick_proxy = create_proxy(game_tick)
+    window.setInterval(tick_proxy, 50)
+
     update_ui()
+
+
+
+
 
 if document.readyState == "complete":
     setup_game_listeners()

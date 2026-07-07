@@ -406,9 +406,11 @@ body {
 }
 
 .shop-bottom-half {
+    width: 100%;
     flex: 1; /* Takes up the remaining 50% */
     display: flex;
     flex-direction: column;
+    align-items: center;
     padding: 12px;
     box-sizing: border-box;
     overflow: hidden; /* Stops child objects from escaping bounds */
@@ -416,13 +418,13 @@ body {
 
 .section-title {
     margin: 0 0 8px 0;
-    font-size: 1.1rem;
+    font-size: 2rem;
     color: #fff;
     letter-spacing: 1px;
 }
 
 /* The Upgrade Item scrolling viewport track */
-.upgrade-list {
+.card-list {
     flex: 1;
     overflow-y: auto; /* Adds custom scrollbars dynamically when overflowing */
     display: flex;
@@ -432,7 +434,7 @@ body {
 }
 
 /* Individual Upgrade Row Items cards */
-.upgrade-item {
+.card-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -442,23 +444,99 @@ body {
     border-radius: 6px;
 }
 
-.upgrade-details {
+.w80 {
+width: 80%;
+}
+
+/* Master Card Container Box Model */
+.card-item.massive-factory-card {
+    display: flex;
+    flex-direction: column; /* Forces vertical stacking inside the card boundaries */
+    width: 100%;
+    background: rgba(20, 20, 25, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden; /* Ensures child backgrounds don't bleed past the rounded card corners */
+    margin-bottom: 12px;
+}
+
+/* Internal Layout Row Segments */
+.factory-tier-half {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 10px;
+    padding: 16px; /* Uniform card interior breathing room */
+    box-sizing: border-box;
+    width: 100%;
 }
 
-.upgrade-name {
-    font-weight: bold;
-    color: #e0e0e8;
+/* Sharp, edge-to-edge layout split line */
+.horizontal-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(
+        to right, 
+        rgba(255, 255, 255, 0.02), 
+        rgba(255, 255, 255, 0.12) 15%, 
+        rgba(255, 255, 255, 0.12) 85%, 
+        rgba(255, 255, 255, 0.02)
+    );
 }
 
-.upgrade-cost {
-    font-size: 0.85rem;
-    color: #e09f3e;
+/* Left-to-Right layout items placement trackers */
+.factory-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
-.buy-btn {
-    padding: 6px 12px;
-    cursor: pointer;
+.factory-row-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+/* Button Alignment Containers */
+.factory-btn-cluster {
+    display: flex;
+    gap: 8px;
+    width: 50%;
+    max-width: 240px;
+}
+
+
+
+/* Text Sizing Standardization Rules */
+.card-name { font-size: 1.15rem; font-weight: bold; color: #fff; }
+.card-cost { font-size: 1.05rem; color: #e09f3e;}
+.card-stat-label { font-size: 0.95rem; color: #aaa;}
+
+/* Locking state handling logic overlay styles */
+.card-item.massive-factory-card.locked {
+    filter: grayscale(100%) brightness(55%);
+}
+.card-item.massive-factory-card.locked .split-top {
+    pointer-events: auto; /* Left clickable for unlocking */
+}
+.card-item.massive-factory-card.locked .split-bottom {
+    pointer-events: none; /* Blocked until un-grayed */
+    opacity: 0.4;
+}
+
+.factory-tier-half.minimal-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px; /* Slightly tighter vertical padding for the streamlined section */
+}
+
+/* Force the upgrade button to keep a balanced size instead of blowing up */
+.factory-tier-half.minimal-row .upgrade-action {
+    flex: none;
+    width: 110px;
+    padding: 6px 0;
 }
