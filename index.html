@@ -28,14 +28,18 @@
         <main class="main-content" id="main-layout" data-state="collapsed">
             
             <section class="viewport-panel">
+                
                 <div class="clicker-wrapper">
+                    <button class="prev-res" hidden>&#8592;</button>
                     <img 
                         id="clicker-image" 
                         src="img/BloodRockOfNight.png" 
                         alt="Target Asteroid" 
                         class="clicker-target"
                     />
+                    <button class="next-res" hidden>&#8594;</button>
                 </div>
+                
             </section>
 
             <nav class="menu-panel">
@@ -69,7 +73,11 @@
                                 />
                                 <div id="sell-percentage-display" class="percentage">100%</div>
                             </div>
+                            <div>
+                            <button class="prev-res secondary-btn" hidden>&#8592;</button>
                             <button id="sell-btn-main" class="secondary-btn">Sell</button>
+                            <button class="next-res secondary-btn" hidden>&#8594;</button>
+                            </div>
                         </div>
 
                         <div class="shop-bottom-half">

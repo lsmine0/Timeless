@@ -18,7 +18,7 @@ state = {
         Decimal.new("0"), 
         Decimal.new("0"), 
         Decimal.new("0")],
-    "money": Decimal.new("10250"),
+    "money": Decimal.new("1000000"),
     "click_power": [
         Decimal.new("1"),
         Decimal.new("1"),
@@ -26,7 +26,8 @@ state = {
     "sell_power": [
         Decimal.new("1"),
         Decimal.new("1")],
-    "current_resource": ResourceType.BLOOD_ROCK
+    "current_resource": ResourceType.BLOOD_ROCK,
+    "resource_unlock": [False, False, False]
 }
 
 factories = {
@@ -63,7 +64,7 @@ factories = {
 class PrintFormat(Enum):
     SCIENTIFIC = 0      # 1.23e100
     NORMAL = 1          # 123,456
-    SHORT = 3           # 123.45K / 1.23M / 4.56B
+    SHORT = 3           # 123, 1e6, 1e12
     LETTERS = 4         # 1.23K, 4.56Qa, 7.89Dc
 
 
@@ -75,19 +76,35 @@ settings = {
 
 def unlock_f1():
     factories["F1"][0] = True
-    pass
+
+def mult_click_u2():
+    state["click_power"][0] = state["click_power"][0].add(1)
+
+def unlock_r2():
+    state["resource_unlock"][0] = True;
+    next_btn = document.querySelectorAll(".next-res")
+    for btn in next_btn:
+        btn.removeAttribute("hidden")
+    prev_btn = document.querySelectorAll(".prev-res")
+    for btn in prev_btn:
+        btn.removeAttribute("hidden")
 
 def unlock_f2():
-    factories["F2"][0] = True
-    pass
+    factories["F2"][0] = True        
+
+def unlock_r3():
+    state["resource_unlock"][1] = True;
+
 
 def unlock_f3():
     factories["F3"][0] = True
-    pass
-    
+
+def unlock_r4():
+    state["resource_unlock"][2] = True;
+
 def unlock_f4():
     factories["F4"][0] = True
-    pass
+
 
 upgradelist = [
     {
@@ -95,51 +112,107 @@ upgradelist = [
         "id": "U1", 
         "cost": Decimal.new("20"), 
         "label": "Unlock Factory 1", 
-        "action": unlock_f1
+        "action": unlock_f1,
+        "req": []
     },
     {
         "purchased": False, 
         "id": "U2", 
-        "cost": Decimal.new("ee9.9"), 
-        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
-        "action": unlock_f1
+        "cost": Decimal.new("100"), 
+        "label": "Base click power increased +1", 
+        "action": mult_click_u2,
+        "req": []
     },
     {
         "purchased": False, 
         "id": "U3", 
-        "cost": Decimal.new("ee9.9"), 
-        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
-        "action": unlock_f1
+        "cost": Decimal.new("5000"), 
+        "label": "Unlock Next Resource", 
+        "action": unlock_r2,
+        "req": []
     },
     {
         "purchased": False, 
         "id": "U4", 
-        "cost": Decimal.new("ee9.9"), 
-        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
-        "action": unlock_f1
+        "cost": Decimal.new("6000"), 
+        "label": "Unlock Factory 2", 
+        "action": unlock_f2,
+        "req": [ "U3" ]
     },
     {
         "purchased": False, 
         "id": "U5", 
-        "cost": Decimal.new("ee9.9"), 
-        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
-        "action": unlock_f1
+        "cost": Decimal.new("25000"), 
+        "label": "Unlock Next Resource", 
+        "action": unlock_r3,
+        "req": [ "U3" ]
     },
     {
         "purchased": False, 
         "id": "U6", 
-        "cost": Decimal.new("ee9.9"), 
-        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
-        "action": unlock_f1
+        "cost": Decimal.new("30000"), 
+        "label": "Unlock Factory 3", 
+        "action": unlock_f3,
+        "req": [ "U5" ]
     },
     {
         "purchased": False, 
         "id": "U7", 
-        "cost": Decimal.new("ee9.9"), 
-        "label": "N̵̨̤̫̠͇̂̎͑̂̐̉͠U̴̧͈̞̱̲̗̾͑̓̃̊̿ͅḶ̵̡̰̪̝̦̳̳͂ͅL̷̢̝̙̩̜̫̣͉̝̜̜̓̍͛̚͝", 
-        "action": unlock_f1
+        "cost": Decimal.new("1000000"), 
+        "label": "Unlock Next Resource", 
+        "action": unlock_r4,
+        "req": [ "U5" ]
+    },
+    {
+        "purchased": False, 
+        "id": "U8", 
+        "cost": Decimal.new("2000000"), 
+        "label": "Unlock Next Resource", 
+        "action": unlock_f4,
+        "req": [ "U7" ]
     }
 ]
+
+def get_next_resource():
+    current = state["current_resource"].value
+    total = len(ResourceType)
+
+    for offset in range(1, total + 1):
+        next_id = (current + offset) % total
+
+        # First resource is always unlocked
+        if next_id == ResourceType.BLOOD_ROCK.value or state["resource_unlock"][next_id - 1]:
+            state["current_resource"] = ResourceType(next_id)
+            return state["current_resource"]
+
+    return state["current_resource"]
+
+
+def get_previous_resource():
+    current = state["current_resource"].value
+    total = len(ResourceType)
+
+    for offset in range(1, total + 1):
+        prev_id = (current - offset) % total
+
+        # First resource is always unlocked
+        if prev_id == ResourceType.BLOOD_ROCK.value or state["resource_unlock"][prev_id - 1]:
+            state["current_resource"] = ResourceType(prev_id)
+            return state["current_resource"]
+
+    return state["current_resource"]
+
+
+imageDict = {
+    ResourceType.BLOOD_ROCK:  "img/BloodRockOfNight.png",
+    ResourceType.HOT_METAL: "img/HotMetalOfLostWorld.png",
+    ResourceType.LIGHT_CRYSTAL: "img/LightCrystalVariant2.png", 
+    ResourceType.RED_DIAMOND: "img/RedDiamondOfTelor.png",
+}
+
+def change_img():
+    document.querySelector("#clicker-image").src = imageDict[state["current_resource"]];
+    document.querySelector(".resource-preview-wrapper").querySelector("img").src = imageDict[state["current_resource"]];
 
 
 def buy_upgrade(upgrade_id):
@@ -152,7 +225,7 @@ def buy_upgrade(upgrade_id):
         
         if not target_upg or target_upg["purchased"]:
             return
-        
+
         target_upg["action"]() 
         state["money"] = state["money"].minus(cost)
         # 2. Mark state status
@@ -169,6 +242,14 @@ def buy_upgrade(upgrade_id):
 def upgrade_handler(u_id):
     return create_proxy(lambda event: buy_upgrade(u_id))
 
+def upgrade_is_available(upg):
+    for req_id in upg.get("req", []):
+        required = next((u for u in upgradelist if u["id"] == req_id), None)
+
+        if required is None or not required["purchased"]:
+            return False
+
+    return True
 
 def RebuilUpgradeList():
     container = document.getElementById("upgrades-container")
@@ -178,7 +259,10 @@ def RebuilUpgradeList():
 
     container.innerHTML = ""
 
-    available_upgrades = [u for u in upgradelist if not u["purchased"]]
+    available_upgrades = [
+        u for u in upgradelist
+        if not u["purchased"] and upgrade_is_available(u)
+    ]
     
 
     sorted_upgrades = sorted(available_upgrades, key=lambda x: float(x["cost"].toString()))
@@ -297,7 +381,7 @@ def update_ui():
 
     
 
-def buy_factory(f_id, amount_type="1"):
+def buy_factory(f_id, amount_type="1", silent=False):
     user_cash = state["money"]
     data = factories[f_id]
     cost = data[3]
@@ -306,7 +390,8 @@ def buy_factory(f_id, amount_type="1"):
 
     if amount_type == "1":
         if user_cash.gte(cost):
-            ClickEffect()
+            if not silent:
+                ClickEffect()
             state["money"] = user_cash.minus(cost)
             data[1] = data[1].plus(Decimal.new("1")) # Count += 1
             data[0] = True # Set isUnlocked to True
@@ -316,7 +401,8 @@ def buy_factory(f_id, amount_type="1"):
     elif amount_type == "max":
         # Check how many they can afford right now
         if user_cash.gte(cost):
-            ClickEffect()
+            if not silent:
+                ClickEffect()
 
             ratio = user_cash.div(cost)
             afford_count = Decimal.log2(ratio).floor()
@@ -334,7 +420,7 @@ def buy_factory(f_id, amount_type="1"):
 
                 # Next price after n purchases
                 data[3] = cost.times(Decimal.new("2").pow(afford_count))
-
+                buy_factory(f_id, silent=True)
     update_ui()                   
 
 def upgrade_factory(f_id):
@@ -368,21 +454,20 @@ def onSellClick(event):
     current_currency = Decimal.new(state["money"])
     total_profit = Decimal.new("0")
     
-    for index, count_str in enumerate(state["resources_arr"]):
-        total_items = Decimal.new(count_str)
-        
-        items_to_sell = total_items.times(sell_percent).floor() 
-        items_remaining = total_items.minus(items_to_sell)
-        
-        item_value = Resource_multipliers[index]
+    index = state["current_resource"].value
+    total_items = state["resources_arr"][index]
+            
+    items_to_sell = total_items.times(sell_percent).floor() 
+    items_remaining = total_items.minus(items_to_sell)
+            
+    item_value = Resource_multipliers[index]
 
-        sellmult = state["click_power"][1]
-        sellpow = state["click_power"][2]
+    sellmult = state["sell_power"][0]
+    sellpow = state["sell_power"][1]
 
-        total_profit = total_profit.plus(items_to_sell.times(item_value.times(sellmult).pow(sellpow)))
-        
-
-        state["resources_arr"][index] = items_remaining
+    total_profit = total_profit.plus(items_to_sell.times(item_value.times(sellmult).pow(sellpow)))
+            
+    state["resources_arr"][index] = items_remaining
         
     new_currency_total = current_currency.plus(total_profit)
     state["money"] = new_currency_total
@@ -434,34 +519,7 @@ def game_tick():
 
     update_ui()
 
-def setup_game_listeners(event=None):
-    click_target = document.getElementById("clicker-image")
-    if click_target:
-        click_target.addEventListener("click", create_proxy(onClickerClick))
 
-    shop_sell_btn = document.getElementById("sell-btn-main")
-    if shop_sell_btn:
-        shop_sell_btn.addEventListener("click", create_proxy(onSellClick))
-
-    sell_slider = document.getElementById("sell-slider")
-    if sell_slider:
-        slider_proxy = create_proxy(onSliderChange)
-        sell_slider.addEventListener("input", slider_proxy)
-
-    for f_id in factories.keys():
-        btn_buy1 = document.getElementById(f"{f_id}-buy1")
-        btn_max = document.getElementById(f"{f_id}-buymax")
-        btn_up = document.getElementById(f"{f_id}-upgrade")
-        
-        if btn_buy1: btn_buy1.addEventListener("click", make_buy_handler(f_id, "1"))
-        if btn_max: btn_max.addEventListener("click", make_buy_handler(f_id, "max"))
-        if btn_up: btn_up.addEventListener("click", make_upgrade_handler(f_id))
-
-    tick_proxy = create_proxy(game_tick)
-    window.setInterval(tick_proxy, 50)
-
-    update_ui()
-    RebuilUpgradeList()
 
 
 def DisplayNumber(value):
@@ -502,6 +560,54 @@ def DisplayNumber(value):
                 )
 
             return value.toExponential(2)
+
+def next_resource(event):
+    get_next_resource()
+    change_img()
+    update_ui()
+
+def prev_resource(event):
+    get_previous_resource()
+    change_img()
+    update_ui()
+
+
+def setup_game_listeners(event=None):
+    click_target = document.getElementById("clicker-image")
+    if click_target:
+        click_target.addEventListener("click", create_proxy(onClickerClick))
+
+    shop_sell_btn = document.getElementById("sell-btn-main")
+    if shop_sell_btn:
+        shop_sell_btn.addEventListener("click", create_proxy(onSellClick))
+
+    sell_slider = document.getElementById("sell-slider")
+    if sell_slider:
+        slider_proxy = create_proxy(onSliderChange)
+        sell_slider.addEventListener("input", slider_proxy)
+
+    for f_id in factories.keys():
+        btn_buy1 = document.getElementById(f"{f_id}-buy1")
+        btn_max = document.getElementById(f"{f_id}-buymax")
+        btn_up = document.getElementById(f"{f_id}-upgrade")
+        
+        if btn_buy1: btn_buy1.addEventListener("click", make_buy_handler(f_id, "1"))
+        if btn_max: btn_max.addEventListener("click", make_buy_handler(f_id, "max"))
+        if btn_up: btn_up.addEventListener("click", make_upgrade_handler(f_id))
+
+    next_btn = document.querySelectorAll(".next-res")
+    prev_btn = document.querySelectorAll(".prev-res")
+    for btn in next_btn:
+        btn.addEventListener("click", create_proxy(next_resource))    
+    
+    for btn in prev_btn:
+        btn.addEventListener("click", create_proxy(prev_resource))
+
+    tick_proxy = create_proxy(game_tick)
+    window.setInterval(tick_proxy, 50)
+
+    update_ui()
+    RebuilUpgradeList()
 
 
 
