@@ -18,7 +18,7 @@ state = {
         Decimal.new("0"), 
         Decimal.new("0"), 
         Decimal.new("0")],
-    "money": Decimal.new("100"),
+    "money": Decimal.new("10250"),
     "click_power": [
         Decimal.new("1"),
         Decimal.new("1"),
@@ -60,9 +60,17 @@ factories = {
     ]
 }
 
-settings = {
+class PrintFormat(Enum):
+    SCIENTIFIC = 0      # 1.23e100
+    NORMAL = 1          # 123,456
+    SHORT = 3           # 123.45K / 1.23M / 4.56B
+    LETTERS = 4         # 1.23K, 4.56Qa, 7.89Dc
 
+
+settings = {
+    "printFormat": PrintFormat.LETTERS
 }
+
 
 
 def unlock_f1():
@@ -135,20 +143,18 @@ upgradelist = [
 
 
 def buy_upgrade(upgrade_id):
-    user_cash = state["money"]
     # Locate target profile metadata matching targeted ID
     target_upg = next((u for u in upgradelist if u["id"] == upgrade_id), None)
-    
     cost = target_upg["cost"]
     
-    if user_cash.gte(cost):
+    if state["money"].gte(cost):
         target_upg = next((u for u in upgradelist if u["id"] == upgrade_id), None)
         
         if not target_upg or target_upg["purchased"]:
             return
-
-        target_upg["action"]() 
         
+        target_upg["action"]() 
+        state["money"] = state["money"].minus(cost)
         # 2. Mark state status
         target_upg["purchased"] = True
         
@@ -157,6 +163,7 @@ def buy_upgrade(upgrade_id):
         if card_element:
             card_element.remove()
 
+        update_ui()
         RebuilUpgradeList()    
 
 def upgrade_handler(u_id):
@@ -194,7 +201,7 @@ def RebuilUpgradeList():
         
         cost_span = document.createElement("span")
         cost_span.className = "card-cost"
-        cost_span.textContent = f"💰 {upg['cost'].toString()}"
+        cost_span.textContent = f"💰 {DisplayNumber(upg['cost'].ceil())}"
         
         details.appendChild(label_span)
         details.appendChild(cost_span)
@@ -248,19 +255,19 @@ def onSliderChange(event):
     expected_profit = items_to_sell.times(item_value)
     
     # 4. Update the text elements
-    display.textContent = f"{percent_val}% ({items_to_sell.toString()} / {total_resources.floor().toString()})"
-    sell_btn.textContent = f"Sell {items_to_sell.toString()} for 💰 {expected_profit.toString()}"
+    display.textContent = f"{percent_val}% ({DisplayNumber(items_to_sell)} / {DisplayNumber(total_resources.floor())})"
+    sell_btn.textContent = f"Sell {DisplayNumber(items_to_sell)} for 💰 {DisplayNumber(expected_profit)}"
 
 
 
 
 def update_ui():
-    document.getElementById("money-val").textContent = state["money"].toString()
+    document.getElementById("money-val").textContent = DisplayNumber(state["money"].floor())
     
     for index, count in enumerate(state["resources_arr"]):
         target_el = document.getElementById(f"res-{index}")
         if target_el:
-            target_el.textContent = count.floor().toString()
+            target_el.textContent = DisplayNumber(count.floor())
 
     onSliderChange(None)    
 
@@ -277,10 +284,10 @@ def update_ui():
         mulcost_el = document.getElementById(f"{f_id}-mult-cost")
         card_item = document.getElementById(f_id)
         
-        if count_el: count_el.textContent = count.toString()
-        if mult_el: mult_el.textContent = f"{mult.toString()}x"
-        if cost_el: cost_el.textContent = cost.toString()
-        if mulcost_el: mulcost_el.textContent = multcost.toString()
+        if count_el: count_el.textContent = DisplayNumber(count)
+        if mult_el: mult_el.textContent = f"{DisplayNumber(mult)} x"
+        if cost_el: cost_el.textContent = DisplayNumber(cost)
+        if mulcost_el: mulcost_el.textContent = DisplayNumber(multcost)
         
         if card_item:
             if is_unlocked:
@@ -296,25 +303,37 @@ def buy_factory(f_id, amount_type="1"):
     cost = data[3]
     if not data[0]: 
         return
-    ClickEffect()
+
     if amount_type == "1":
         if user_cash.gte(cost):
+            ClickEffect()
             state["money"] = user_cash.minus(cost)
             data[1] = data[1].plus(Decimal.new("1")) # Count += 1
             data[0] = True # Set isUnlocked to True
             # Simple scaling pricing mechanic: price * 1.5 per purchase
-            data[3] = cost.times(Decimal.new("1.5")).floor() 
+            data[3] = cost.times(Decimal.new("2"))
             
     elif amount_type == "max":
         # Check how many they can afford right now
         if user_cash.gte(cost):
-            afford_count = user_cash.div(cost).floor()
+            ClickEffect()
+
+            ratio = user_cash.div(cost)
+            afford_count = Decimal.log2(ratio).floor()
+
             if afford_count.gt(0):
-                total_spent = afford_count.times(cost)
-                state["currency_str"] = user_cash.minus(total_spent)
+                # Total spent = base * (2^n - 1)
+                total_spent = cost.times(
+                    Decimal.new("2").pow(afford_count)
+                    .minus(Decimal.new("1"))
+                )
+
+                state["money"] = user_cash.minus(total_spent)
                 data[1] = data[1].plus(afford_count)
                 data[0] = True
-                data[3] = cost.times(Decimal.new("1.5").pow(afford_count)).floor()
+
+                # Next price after n purchases
+                data[3] = cost.times(Decimal.new("2").pow(afford_count))
 
     update_ui()                   
 
@@ -444,6 +463,45 @@ def setup_game_listeners(event=None):
     update_ui()
     RebuilUpgradeList()
 
+
+def DisplayNumber(value):
+    match settings["printFormat"]:
+        case PrintFormat.SCIENTIFIC:
+            return value.toExponential(2)
+        case PrintFormat.NORMAL:
+            return value.toStringWithDecimalPlaces(2)
+        case PrintFormat.SHORT:
+            if value.lt(1e6):
+                return value.toStringWithDecimalPlaces(0)
+            return value.toExponential(1)
+        case PrintFormat.LETTERS:
+            suffixes = [
+            "", "K", "M", "B", "T",
+            "Qa", "Qi", "Sx", "Sp", "Oc", 
+            "No", "Dc", "UDc", "DDc", "TDc",
+            "QaDc", "QiDc", "SxDc", "SpDc",
+            "OcDc", "NoDc", "Vg", "UVg",
+            "DVg", "TVg", "QaVg", "QiVg",
+            "SxVg", "SpVg", "OVg", "NVg",
+            "Tg", "Tgm","G",   
+            ]
+
+            if value.lt(1000):
+                return value.toStringWithDecimalPlaces(0)
+
+            power = value.log10().floor()
+            tier = power.div(3).floor()
+
+            if tier.lt(len(suffixes)):
+                divisor = Decimal.new(1000).pow(tier)
+                scaled = value.div(divisor)
+
+                return (
+                    scaled.toStringWithDecimalPlaces(2)
+                    + suffixes[tier.toNumber()]
+                )
+
+            return value.toExponential(2)
 
 
 
