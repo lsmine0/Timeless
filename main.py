@@ -1,6 +1,7 @@
 from js import document, Decimal, Audio, window
 from pyodide.ffi import create_proxy
 from enum import Enum
+import random
 
 class ResourceType(Enum):
     BLOOD_ROCK = 0
@@ -18,7 +19,7 @@ state = {
         Decimal.new("0"), 
         Decimal.new("0"), 
         Decimal.new("0")],
-    "money": Decimal.new("1000000"),
+    "money": Decimal.new("1e10"),
     "click_power": [
         Decimal.new("1"),
         Decimal.new("1"),
@@ -26,8 +27,15 @@ state = {
     "sell_power": [
         Decimal.new("1"),
         Decimal.new("1")],
+    "factory_power": [
+        Decimal.new("1"),
+        Decimal.new("1")],    
     "current_resource": ResourceType.BLOOD_ROCK,
-    "resource_unlock": [False, False, False]
+    "resource_unlock": [False, False, False],
+    "U9_bought": False,
+    "U10_bought": False,
+    "UPotion_Unlock": False
+
 }
 
 factories = {
@@ -50,14 +58,14 @@ factories = {
         Decimal.new("0"),
         Decimal.new("1"),
         Decimal.new("1000"),
-        Decimal.new("1e30")
+        Decimal.new("1e24")
     ],
     "F4" : [
         False,
         Decimal.new("0"),
         Decimal.new("1"),
         Decimal.new("10000"),
-        Decimal.new("1e50")
+        Decimal.new("1e48")
     ]
 }
 
@@ -93,18 +101,27 @@ def unlock_f2():
     factories["F2"][0] = True        
 
 def unlock_r3():
-    state["resource_unlock"][1] = True;
+    state["resource_unlock"][1] = True
 
 
 def unlock_f3():
     factories["F3"][0] = True
 
 def unlock_r4():
-    state["resource_unlock"][2] = True;
+    state["resource_unlock"][2] = True
 
 def unlock_f4():
     factories["F4"][0] = True
 
+def mult_click_u9():
+    state["U9_bought"] = True
+
+def factory_mult_u10():
+    state["U10_bought"] = True
+
+def unlock_potion():
+    document.getElementById("Alchemy").removeAttribute("hidden")
+    state["UPotion_Unlock"] = True    
 
 upgradelist = [
     {
@@ -126,7 +143,7 @@ upgradelist = [
     {
         "purchased": False, 
         "id": "U3", 
-        "cost": Decimal.new("5000"), 
+        "cost": Decimal.new("1000"), 
         "label": "Unlock Next Resource", 
         "action": unlock_r2,
         "req": []
@@ -134,7 +151,7 @@ upgradelist = [
     {
         "purchased": False, 
         "id": "U4", 
-        "cost": Decimal.new("6000"), 
+        "cost": Decimal.new("2000"), 
         "label": "Unlock Factory 2", 
         "action": unlock_f2,
         "req": [ "U3" ]
@@ -170,8 +187,50 @@ upgradelist = [
         "label": "Unlock Next Resource", 
         "action": unlock_f4,
         "req": [ "U7" ]
+    },
+    {
+        "purchased": False, 
+        "id": "U9", 
+        "cost": Decimal.new("200"), 
+        "label": "Boost Click Power Based on Resource", 
+        "action": mult_click_u9,
+        "req": []
+    },
+    {
+        "purchased": False, 
+        "id": "U10", 
+        "cost": Decimal.new("1500"), 
+        "label": "Boost Previous Factory Based on Next Resource", 
+        "action": factory_mult_u10,
+        "req": [ "U3" ]
+    },
+    {
+        "purchased": False, 
+        "id": "U11", 
+        "cost": Decimal.new("1e9"), 
+        "label": "Unlock Alchemy", 
+        "action": unlock_potion,
+        "req": [ "U3" ]
     }
 ]
+
+def show_click_popup(text, x, y):
+    popup = document.createElement("div")
+
+    popup.className = "click-popup"
+    popup.textContent = text
+
+    popup.style.left = f"{x + random.randint(-15, 15)}px"
+    popup.style.top = f"{y + random.randint(-10, 10)}px"
+
+    document.body.appendChild(popup)
+
+    def remove_popup(event):
+        popup.remove()
+
+    remove_proxy = create_proxy(remove_popup)
+    popup.addEventListener("animationend", remove_proxy)
+
 
 def get_next_resource():
     current = state["current_resource"].value
@@ -367,7 +426,7 @@ def update_ui():
         cost_el = document.getElementById(f"{f_id}-cost")
         mulcost_el = document.getElementById(f"{f_id}-mult-cost")
         card_item = document.getElementById(f_id)
-        
+  
         if count_el: count_el.textContent = DisplayNumber(count)
         if mult_el: mult_el.textContent = f"{DisplayNumber(mult)} x"
         if cost_el: cost_el.textContent = DisplayNumber(cost)
@@ -432,7 +491,7 @@ def upgrade_factory(f_id):
     if user_cash.gte(up_cost):
         ClickEffect()
         state["money"] = user_cash.minus(up_cost)
-        data[4] = data[4].pow(Decimal.new("2"))
+        data[4] = data[4].times(Decimal.new("1e6"))
         data[2] = data[2].plus(Decimal.new("1")) # Multiplier production step up +1
         update_ui()
 
@@ -484,6 +543,7 @@ def onClickerClick(event):
     ClickEffect()
 
 
+
     active_idx = state["current_resource"].value
     
     current_resource_amt = state["resources_arr"][active_idx]
@@ -492,9 +552,26 @@ def onClickerClick(event):
     clickpow = state["click_power"][2]
 
     delta = Decimal.new("0").plus(clickflat).mul(clickmult).pow(clickpow)
+
+    if state["U9_bought"]:
+        for resource in state["resources_arr"]:
+            if resource.lt(2):
+                continue    
+            delta = delta.times(resource.log10())    
+
+
+
+    show_click_popup(
+        f"{DisplayNumber(delta)}",
+        event.clientX,
+        event.clientY
+    )
+
+
     state["resources_arr"][active_idx] = state["resources_arr"][active_idx].plus(delta)
     
     update_ui()
+
 
 
 def game_tick():
@@ -508,11 +585,24 @@ def game_tick():
         count = data[1]
         power = data[2]
         
+        mult = state["factory_power"][0]
+        powe = state["factory_power"][1]
 
         if is_unlocked and count.gt(0):
-            produced_this_tick = count.pow(power).times(tick_fraction)
+
             
-            if produced_this_tick.gt(0):
+            production_second = count.times(Decimal.new(2).pow(power))
+            production_second = production_second.times().pow()
+            if state["U10_bought"] and index < len(state["resources_arr"]) - 1:
+                next_resource = state["resources_arr"][index + 1]
+
+                if next_resource.gt(1):
+                    resource_log = next_resource.log(300).plus(1)
+                    production_second = production_second.pow(resource_log)
+
+            document.getElementById(f"{f_id}-prod").textContent = DisplayNumber(production_second)    
+            if production_second.gt(0):
+                produced_this_tick = production_second.times(tick_fraction)
                 # Add to current resource stockpile
                 current_stock = state["resources_arr"][index]
                 state["resources_arr"][index] = current_stock.plus(produced_this_tick)

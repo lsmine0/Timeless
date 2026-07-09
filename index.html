@@ -45,7 +45,7 @@
             <nav class="menu-panel">
                 <button class="menu-btn" onclick="openInspector('panel-shop')">Shop</button>
                 <button class="menu-btn" onclick="openInspector('panel-factories')">Factories</button>
-                <button class="menu-btn" onclick="openInspector('panel-potions')">Potions</button>
+                <button id="Alchemy" class="menu-btn" onclick="openInspector('panel-potions')" >Alchemy</button>
                 <button class="menu-btn" onclick="openInspector('panel-skills')">Skills</button>
             </nav>
 
@@ -95,6 +95,7 @@
                                     <div class="factory-tier-half split-top">
                                         <div class="factory-row-header">
                                             <span class="card-name">Quarry Core</span>
+                                            <span class="card-prod" id="F1-prod">0</span>
                                             <span class="card-cost">💰 <span id="F1-cost">10</span></span>
                                         </div>
                                         <div class="factory-row-controls">
@@ -119,6 +120,7 @@
                                     <div class="factory-tier-half split-top">
                                         <div class="factory-row-header">
                                             <span class="card-name">Synth Foundry</span>
+                                            <span class="card-prod" id="F2-prod">0</span>
                                             <span class="card-cost">💰 <span id="F2-cost">100</span></span>
                                         </div>
                                         <div class="factory-row-controls">
@@ -143,6 +145,7 @@
                                     <div class="factory-tier-half split-top">
                                         <div class="factory-row-header">
                                             <span class="card-name">Orbital Gantry</span>
+                                            <span class="card-prod" id="F3-prod">0</span>
                                             <span class="card-cost">💰 <span id="F3-cost">1,000</span></span>
                                         </div>
                                         <div class="factory-row-controls">
@@ -167,6 +170,7 @@
                                     <div class="factory-tier-half split-top">
                                         <div class="factory-row-header">
                                             <span class="card-name">Void Engine</span>
+                                            <span class="card-prod" id="F4-prod">0</span>
                                             <span class="card-cost">💰 <span id="F4-cost">10,000</span></span>
                                         </div>
                                         <div class="factory-row-controls">
@@ -190,9 +194,11 @@
                     </div>
 
                     <div id="panel-potions" class="inspector-content">
-                        <h2>Potion Brewer</h2>
-                        <div class="resource-preview" style="background-color: #3c1e4a;"></div>
-                        <button class="sell-btn">Brew Potion</button>
+                        <h2 class="section-title">Potion Brewer</h2>
+
+                        <div id="potions-container" class="card-list w80 potion-scroll">
+                            
+                        </div>
                     </div>
 
                     <div id="panel-skills" class="inspector-content">

@@ -547,3 +547,28 @@ width: 80%;
     padding: 6px 0;
 }
 
+
+.click-popup {
+    position: absolute;
+    pointer-events: none;
+    font-weight: bold;
+    font-size: 24px;
+    animation: popup-float 0.8s ease-out forwards;
+}
+
+@keyframes popup-float {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(1.3);
+    }
+}
+
+.potion-scroll {
+    max-height: 500px;
+    overflow-y: auto;
+}
