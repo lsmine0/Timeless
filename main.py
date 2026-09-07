@@ -29,7 +29,7 @@ state = {
         Decimal.new("1")],
     "factory_power": [
         Decimal.new("1"),
-        Decimal.new("1")],    
+        Decimal.new("0")],    
     "current_resource": ResourceType.BLOOD_ROCK,
     "resource_unlock": [False, False, False],
     "U9_bought": False,
@@ -592,7 +592,6 @@ def game_tick():
 
             
             production_second = count.times(Decimal.new(2).pow(power))
-            production_second = production_second.times().pow()
             if state["U10_bought"] and index < len(state["resources_arr"]) - 1:
                 next_resource = state["resources_arr"][index + 1]
 
@@ -601,6 +600,7 @@ def game_tick():
                     production_second = production_second.pow(resource_log)
 
             document.getElementById(f"{f_id}-prod").textContent = DisplayNumber(production_second)    
+
             if production_second.gt(0):
                 produced_this_tick = production_second.times(tick_fraction)
                 # Add to current resource stockpile
